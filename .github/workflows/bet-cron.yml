@@ -30,6 +30,7 @@ jobs:
         env:
           WC_PLAYER: flav
           WC_MODEL: perplexity/sonar-pro
+          WC_COUNT: "2"            
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.live }}" = "false" ]; then
