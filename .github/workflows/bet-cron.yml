@@ -1,0 +1,39 @@
+# GitHub Actions workflow — runs the World Cup bot in the cloud (no PC needed).
+# Put this file at:  .github/workflows/bet-cron.yml   in a repo that also
+# contains worldcup_bot.py at the root. Then enable Actions for the repo.
+#
+# It needs no secrets and no pip installs (the bot uses only Python stdlib).
+# Tip: for the very first run, click "Run workflow" with the box below set to
+# dry run to confirm it connects, then let the schedule take over.
+
+name: WC bet bot
+
+on:
+  schedule:
+    - cron: "0 6,18 * * *"     # twice a day (06:00 & 18:00 UTC) — covers busy match days
+  workflow_dispatch:           # manual "Run workflow" button
+    inputs:
+      live:
+        description: "Place real bets? (false = dry run)"
+        type: boolean
+        default: true
+
+jobs:
+  bet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run bot
+        env:
+          WC_PLAYER: flav
+          WC_MODEL: perplexity/sonar-pro
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.live }}" = "false" ]; then
+            python worldcup_bot.py
+          else
+            python worldcup_bot.py --live
+          fi
